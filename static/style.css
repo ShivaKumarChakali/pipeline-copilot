@@ -1,0 +1,39 @@
+* { box-sizing: border-box; }
+body { font-family: Georgia, 'Times New Roman', serif; color: #1a1a1a;
+  background: #f7f5f0; margin: 0; line-height: 1.5; }
+header { background: #14213d; color: #fff; padding: 28px 24px 20px; }
+header h1 { margin: 0 0 6px; font-size: 30px; }
+.tagline { margin: 0; color: #dbe4f0; }
+.model-line { margin: 10px 0 0; font-size: 13px; color: #fca311; }
+main { display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+  max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+@media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+.panel { background: #fff; border: 1px solid #ddd6c8; border-radius: 8px;
+  padding: 20px 22px; }
+.panel h2 { margin-top: 0; font-size: 20px; }
+.panel h3 { font-size: 16px; margin: 18px 0 6px; }
+label { display: block; font-size: 13px; font-weight: bold;
+  margin: 14px 0 4px; }
+input, select, textarea { width: 100%; padding: 8px 10px; font-size: 14px;
+  font-family: inherit; border: 1px solid #b9b2a2; border-radius: 4px;
+  background: #fffdf8; }
+textarea { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; }
+button { margin-top: 16px; padding: 10px 22px; font-size: 15px;
+  background: #14213d; color: #fff; border: none; border-radius: 4px;
+  cursor: pointer; }
+button:hover { background: #1e3358; }
+button:disabled { opacity: 0.5; cursor: wait; }
+.hint { font-size: 13px; color: #666; min-height: 18px; }
+.cause { display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  margin-bottom: 6px; }
+.cause-label { background: #14213d; color: #fff; padding: 6px 12px;
+  border-radius: 4px; font-size: 17px; }
+.confidence { font-size: 13px; color: #555; }
+.fix-title { font-weight: bold; }
+pre { background: #f0ede6; border: 1px solid #ddd6c8; border-radius: 4px;
+  padding: 12px; overflow-x: auto; font-size: 13px; white-space: pre-wrap; }
+#evidenceList li, #schemaDiffList li { margin-bottom: 6px; }
+#evidenceList .src { font-weight: bold; }
+.model-source { font-size: 12px; color: #777; }
+footer { max-width: 1200px; margin: 0 auto 30px; padding: 0 20px;
+  font-size: 13px; color: #666; }

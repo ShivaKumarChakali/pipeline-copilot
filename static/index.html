@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pipeline Copilot</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>Pipeline Copilot</h1>
+  <p class="tagline">Paste a failed pipeline run. Get the likely root cause, the evidence, and a draft fix.</p>
+  <p class="model-line" id="modelLine">Checking model status...</p>
+</header>
+
+<main>
+  <section class="panel" id="inputPanel">
+    <h2>Failed run</h2>
+    <label for="runSelect">Or pick a sample run</label>
+    <select id="runSelect">
+      <option value="">-- choose a sample failed run --</option>
+    </select>
+    <label for="pipelineInput">Pipeline name</label>
+    <input id="pipelineInput" type="text" placeholder="e.g. nightly_orders_load">
+    <label for="stepInput">Failed step</label>
+    <input id="stepInput" type="text" placeholder="e.g. load_orders_mart">
+    <label for="logInput">Error log</label>
+    <textarea id="logInput" rows="10" placeholder="Paste the error log here..."></textarea>
+    <label for="sqlInput">SQL that failed</label>
+    <textarea id="sqlInput" rows="5" placeholder="Paste the SQL here..."></textarea>
+    <label for="schemaInput">Schema before and after (JSON, optional)</label>
+    <textarea id="schemaInput" rows="4" placeholder='{"before": {"table": {"col": "TYPE"}}, "after": {...}}'></textarea>
+    <label for="changesInput">Recent changes (one per line, optional)</label>
+    <textarea id="changesInput" rows="3" placeholder="e.g. Upstream team renamed a column on 2026-10-24"></textarea>
+    <button id="diagnoseBtn" type="button">Diagnose</button>
+    <p class="hint" id="statusLine"></p>
+  </section>
+
+  <section class="panel" id="resultPanel">
+    <h2>Diagnosis</h2>
+    <div id="resultEmpty">
+      <p>No diagnosis yet. Pick a sample run or paste a log, then press Diagnose.</p>
+      <p>The engine reads the log, the SQL, the schema change, and the recent changes, and classifies the failure into one family: schema drift, bad upstream data, permission, data quality, resource or timeout, config or dependency, or unknown.</p>
+    </div>
+    <div id="resultBody" hidden>
+      <div class="cause">
+        <span class="cause-label" id="causeLabel"></span>
+        <span class="confidence" id="confidenceLabel"></span>
+      </div>
+      <h3>What happened</h3>
+      <p id="summaryText"></p>
+      <h3>Evidence</h3>
+      <ul id="evidenceList"></ul>
+      <div id="schemaDiffBlock" hidden>
+        <h3>Schema change</h3>
+        <ul id="schemaDiffList"></ul>
+      </div>
+      <h3>Draft fix</h3>
+      <p class="fix-title" id="fixTitle"></p>
+      <p id="fixDetail"></p>
+      <pre id="fixSql" hidden></pre>
+      <ol id="fixSteps"></ol>
+      <h3>Model review</h3>
+      <p id="fixReview"></p>
+      <p class="model-source" id="modelSource"></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Pipeline Copilot, built for the Meta Global AI Developer Hackathon. Diagnosis runs locally with no API key. Set META_API_KEY to route the summary through the Meta Model API.</p>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
