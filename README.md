@@ -14,6 +14,28 @@ Built for the Meta Global AI Developer Hackathon, Startup track, Build for
 Your World theme. Solo build by Shiva Kumar Chakali, a data engineer with
 10+ years of experience building Snowflake and dbt pipelines in production.
 
+## Demo video
+
+Watch the demo here (screen recording, no voiceover, the walkthrough
+below says everything the video shows):
+
+[Pipeline Copilot demo video](https://drive.google.com/file/d/1kS67uVYyr1wHFvIZoMWRqMNwO1p5Vuls/view?usp=drive_link)
+
+What the video shows, step by step:
+
+1. The home page, with the six sample failed runs in the dropdown.
+2. The schema drift run (`run_01_schema_drift`): pick it, press Diagnose,
+   and the app returns the root cause (schema drift), the evidence (the
+   invalid identifier error line and the removed column), and the draft
+   fix (update the SQL to the new column name).
+3. The permission run (`run_03_permission`): same flow, root cause is a
+   revoked SELECT, with the log line and the fix (restore the grant).
+4. A pasted log of your own, diagnosed the same way.
+
+If the video has no sound, nothing is lost: every result it shows is
+also written out in full in "How to use it" below, and every number and
+log line in it comes from the sample data in `data/runs/`.
+
 ## The honest part first
 
 The diagnosis engine works right now, with no API key and no accounts.
@@ -23,13 +45,14 @@ into one family: schema drift, bad upstream data, permission, data
 quality, resource or timeout, config or dependency, or unknown. It shows
 its evidence, so you can check the call yourself.
 
-The Meta Model API part is not wired up yet, because there is no API key
-in hand. The model layer is built and ready: with no key set, the app
+The Meta Model API part is wired up and was verified live on 2026-11-02
+(endpoint `https://api.meta.ai/v1`, model `muse-spark-1.1`): with a key
+set, the same evidence is sent to the Meta Model API and the model
+rewrites the summary and reviews the draft fix. With no key set, the app
 uses a local model that composes the summary from the engine's structured
-result. With a key set, the same evidence is sent to the Meta Model API
-and the model rewrites the summary and reviews the draft fix. The
-classification and the evidence never come from the model. They always
-come from the local engine, so the app can never invent a root cause.
+result. The classification and the evidence never come from the model.
+They always come from the local engine, so the app can never invent a
+root cause.
 
 See "Meta Model API status" below for exactly what was verified and what
 is still needed.
@@ -154,19 +177,22 @@ chat completions call and asks for a JSON reply with two fields, `summary`
 and `fix_review`. It reads its credentials from the environment and is
 disabled by default. Nothing in the repo contains a key.
 
-What was verified on 2026-10-26:
-- Meta's own product page for the Meta Model API says it gives direct
-  access to Muse Spark, with a one-click API key, and that you point
-  existing OpenAI SDK code at it. That page did not list a base URL or
-  model IDs in the text I could read.
-- The LiteLLM and Promptfoo provider docs agree on the details: base URL
-  `https://api.meta.ai/v1`, POST `/chat/completions`, key in the
-  `META_API_KEY` environment variable, model IDs `muse-spark-1.1` and
-  `muse-spark-1.3`. Those are third party docs, not Meta's own docs.
+Verified live on 2026-11-02:
+- Endpoint `https://api.meta.ai/v1`, model `muse-spark-1.1`, confirmed
+  with a real call against the schema drift sample run. The model
+  returned a plain English summary and a fix review that correctly
+  judged the draft fix (right direction, but check the replacement column
+  with the upstream team and test in dev first).
+- One real gotcha found and fixed in `model.py`: the model spends about
+  2,100 tokens reasoning before answering, so the old 800 token limit
+  cut it off and the reply came back empty. The limit is now 4096, and
+  an empty reply raises a clean error instead of crashing, so the server
+  falls back to the local summary.
 
-What is NOT verified: the base URL and model ID against Meta's own docs
-or the hackathon participant guide, and no live call has been made,
-because there is no API key in hand.
+What is still honest to say: the classification and the evidence never
+come from the model. They always come from the local engine, so the app
+can never invent a root cause. The model only rewrites the summary and
+reviews the fix.
 
 To wire it up, set these from the participant guide:
 
