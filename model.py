@@ -115,7 +115,11 @@ class MetaModelClient:
                 {"role": "user", "content": self._prompt(diagnosis, run)},
             ],
             "temperature": 0.2,
-            "max_tokens": 800,
+            # Reasoning models spend tokens on reasoning before answering
+            # (observed: ~2,100 reasoning tokens on a short diagnosis), so
+            # 800 was too small and the reply came back empty. 4096 leaves
+            # room for reasoning plus the JSON answer.
+            "max_tokens": 4096,
         }
         request = urllib.request.Request(
             self.base_url + "/chat/completions",
@@ -139,6 +143,8 @@ class MetaModelClient:
             text = payload["choices"][0]["message"]["content"]
         except (KeyError, IndexError, TypeError):
             raise RuntimeError("Unexpected response shape from the Meta Model API.")
+        if not text:
+            raise RuntimeError("Meta Model API returned an empty response.")
         parsed = _parse_json_reply(text)
         return {
             "summary": parsed.get("summary") or text,

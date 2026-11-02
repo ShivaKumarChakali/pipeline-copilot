@@ -33,6 +33,7 @@ the Meta Model API. See README.md for the honest status of that wiring.
 import json
 import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from urllib.parse import unquote, urlparse
 
 from diagnose import DiagnosisEngine
 from model import get_model
@@ -94,10 +95,21 @@ class Handler(BaseHTTPRequestHandler):
             if not run:
                 return self.send_json({"error": "unknown run id"}, status=404)
             return self.send_json(public_run(run))
-        path = "/static/index.html" if self.path in ("/", "/index.html") else self.path
-        if not path.startswith("/static/"):
-            return self.send_json({"error": "not found"}, status=404)
-        file_path = os.path.join(HERE, path.lstrip("/"))
+        path = urlparse(self.path).path
+        path = unquote(path)
+        if path in ("/", "/index.html"):
+            file_path = os.path.join(STATIC_DIR, "index.html")
+        else:
+            if not path.startswith("/static/"):
+                return self.send_json({"error": "not found"}, status=404)
+            rel_path = path[len("/static/"):]
+            # Block path traversal: resolve the path and check it stays
+            # inside the static folder. This stops requests like
+            # /static/../diagnose.py or /static/%2e%2e/diagnose.py
+            # from serving source code outside static/.
+            file_path = os.path.realpath(os.path.join(STATIC_DIR, rel_path))
+            if os.path.commonpath([STATIC_DIR, file_path]) != STATIC_DIR:
+                return self.send_json({"error": "not found"}, status=404)
         if not os.path.isfile(file_path):
             return self.send_json({"error": "not found"}, status=404)
         ext = os.path.splitext(file_path)[1]
